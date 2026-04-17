@@ -1,0 +1,7 @@
+{
+  "url": "http://localhost:11434",
+  "model": "gemma4:e4b",
+  "timeout": 60,
+  "show_in_new_window": false,
+  "replace_selection": true
+}
