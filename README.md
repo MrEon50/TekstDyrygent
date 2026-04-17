@@ -1,6 +1,6 @@
 # 🎵 TekstDyrygent - Zaawansowany Notatnik AI
 
-**TekstDyrygent** to potężny, modularny edytor tekstu napisany w Pythonie (Tkinter), zaprojektowany z myślą o efektywnej pracy z tekstem, zaawansowanym formatowaniu oraz lokalnej integracji ze sztuczną inteligencją (Ollama).
+**TekstDyrygent** to modularny edytor tekstu napisany w Pythonie (Tkinter), zaprojektowany z myślą o efektywnej pracy z tekstem, zaawansowanym formatowaniu oraz lokalnej integracji ze sztuczną inteligencją (Ollama).
 
 ## 🚀 Główne Funkcje
 
