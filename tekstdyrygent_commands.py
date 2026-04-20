@@ -334,7 +334,17 @@ class CommandsMixin:
                 messagebox.showwarning("AI", "Brak tekstu w podanym zakresie")
                 return
 
+            old_status = self.status_bar.cget("text")
+            self.status_bar.config(text="🤖 AI (komenda) generuje... Proszę czekać.", fg="blue")
+
+            def restore_cmd_status():
+                """Przywróć status bar i model przy błędzie"""
+                self.status_bar.config(text=old_status, fg="black")
+                self.ollama_model = old_model
+                self.update_status()
+
             def handle_cmd_response(response):
+                self.status_bar.config(text=old_status, fg="black")
                 # Wstawianie wyniku
                 if target_start and target_end:
                     if range_val == 'sel':
@@ -354,7 +364,7 @@ class CommandsMixin:
                 self.update_status()
                 messagebox.showinfo("AI", f"Komenda AI wykonana (model: {model_name})")
 
-            self.call_ollama(prompt, text_to_process, handle_cmd_response)
+            self.call_ollama(prompt, text_to_process, handle_cmd_response, error_callback=restore_cmd_status)
         else:
             messagebox.showerror("Błąd", "Użyj: /ollama(model):prompt:zakres\nZakresy: 0, sel, 10-20")
 

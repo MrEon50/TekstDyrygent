@@ -433,11 +433,12 @@ class SelectionMixin:
 
     # handle_column_copy
     def handle_column_copy(self, event):
-        """Obsługuje Ctrl+C dla zaznaczenia kolumnowego i prawego przycisku"""
-        # Sprawdź zaznaczenie prawym przyciskiem
-        if self.right_click_selection_tags:
+        """Obsługuje Ctrl+C dla zaznaczenia kolumnowego, prawego przycisku i wielokrotnego zaznaczania"""
+        # Sprawdź zaznaczenie prawym przyciskiem i wielokrotne
+        all_point_tags = self.right_click_selection_tags + self.multi_selection_tags
+        if all_point_tags:
             copied_text = []
-            for tag in self.right_click_selection_tags:
+            for tag in all_point_tags:
                 try:
                     ranges = self.text_area.tag_ranges(tag)
                     if ranges:
@@ -481,10 +482,11 @@ class SelectionMixin:
 
     # handle_column_delete
     def handle_column_delete(self, event):
-        """Obsługuje klawisz Delete dla zaznaczenia kolumnowego i prawego przycisku"""
-        # Sprawdź zaznaczenie prawym przyciskiem
-        if self.right_click_selection_tags:
-            for tag in reversed(self.right_click_selection_tags):
+        """Obsługuje klawisz Delete dla zaznaczenia kolumnowego, prawego przycisku i wielokrotnego zaznaczania"""
+        # Sprawdź zaznaczenie prawym przyciskiem i wielokrotne
+        all_point_tags = self.right_click_selection_tags + self.multi_selection_tags
+        if all_point_tags:
+            for tag in reversed(all_point_tags):
                 try:
                     ranges = self.text_area.tag_ranges(tag)
                     if ranges:
@@ -492,6 +494,7 @@ class SelectionMixin:
                 except:
                     continue
             self.clear_right_click_selection()
+            self.clear_multi_selection()
             return "break"
 
         # Sprawdź zaznaczenie kolumnowe
@@ -524,11 +527,12 @@ class SelectionMixin:
 
     # handle_column_type
     def handle_column_type(self, event):
-        """Obsługuje wpisywanie znaków w zaznaczeniu kolumnowym i prawym przyciskiem"""
+        """Obsługuje wpisywanie znaków w zaznaczeniu kolumnowym, prawym przyciskiem i wielokrotnym"""
         if len(event.char) == 1 and event.char.isprintable():
-            # Sprawdź zaznaczenie prawym przyciskiem
-            if self.right_click_selection_tags:
-                for tag in reversed(self.right_click_selection_tags):
+            # Sprawdź zaznaczenie prawym przyciskiem i wielokrotne
+            all_point_tags = self.right_click_selection_tags + self.multi_selection_tags
+            if all_point_tags:
+                for tag in reversed(all_point_tags):
                     try:
                         ranges = self.text_area.tag_ranges(tag)
                         if ranges:
@@ -537,6 +541,7 @@ class SelectionMixin:
                     except:
                         continue
                 self.clear_right_click_selection()
+                self.clear_multi_selection()
                 return "break"
 
             # Sprawdź zaznaczenie kolumnowe

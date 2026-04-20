@@ -41,13 +41,35 @@ class UIMixin:
         self.root.bind('<Control-Shift-M>', selection_prompt_action)
         self.root.bind('<Control-Shift-m>', selection_prompt_action)
 
+        def cancel_ai_action(e):
+            self.ollama_cancel()
+            return 'break'
+
+        self.root.bind('<Control-Shift-X>', cancel_ai_action)
+        self.root.bind('<Control-Shift-x>', cancel_ai_action)
+
         # Nowe skróty
         self.root.bind('<F5>', lambda e: self.quick_save())
-        self.root.bind('<Control-z>', lambda e: self.undo_action())
-        self.root.bind('<Control-Shift-Y>', lambda e: self.redo_action())  # Ctrl+Shift+Y dla redo
+        
+        def safe_undo(e):
+            self.undo_action()
+            return 'break'
+
+        def safe_redo(e):
+            self.redo_action()
+            return 'break'
+
+        def safe_delete_line(e):
+            self.delete_current_line()
+            return 'break'
+
+        self.text_area.bind('<Control-z>', safe_undo)
+        self.text_area.bind('<Control-Shift-Z>', safe_redo)
+        self.text_area.bind('<Control-Shift-Y>', safe_redo)
+        
         # Skrót do usuwania linii
-        self.root.bind('<Control-d>', lambda e: self.delete_current_line())
-        self.root.bind('<Control-Delete>', lambda e: self.delete_current_line())
+        self.text_area.bind('<Control-d>', safe_delete_line)
+        self.text_area.bind('<Control-Delete>', safe_delete_line)
         
         # Wielokrotne zaznaczanie
         self.text_area.bind('<Control-Shift-Button-1>', self.multi_select_click)
@@ -117,6 +139,7 @@ class UIMixin:
             return  # Okno już otwarte
 
         font_window = tk.Toplevel(self.root)
+        font_window.withdraw()
         font_window.title("Wybierz Font")
         font_window.transient(self.root)
         self.center_window(font_window, 35, 50)
@@ -184,6 +207,8 @@ class UIMixin:
         tk.Button(button_frame, text="Zastosuj", command=apply_font).pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="Anuluj", command=font_window.destroy).pack(side=tk.LEFT, padx=5)
 
+        font_window.deiconify()
+
     # change_font_size
     def change_font_size(self):
         window_id = "font_size"
@@ -191,6 +216,7 @@ class UIMixin:
             return  # Okno już otwarte
 
         font_window = tk.Toplevel(self.root)
+        font_window.withdraw()
         font_window.title("Rozmiar tekstu")
         self.center_window(font_window, 35, 20)
         
@@ -226,6 +252,7 @@ class UIMixin:
             font_window.destroy()
 
         font_window.protocol("WM_DELETE_WINDOW", on_close)
+        font_window.deiconify()
 
     # change_text_color
     def change_text_color(self):
@@ -266,6 +293,7 @@ class UIMixin:
             return  # Okno już otwarte
 
         settings_window = tk.Toplevel(self.root)
+        settings_window.withdraw()
         settings_window.title("Ustawienia powiadomień")
         settings_window.transient(self.root)
         self.center_window(settings_window, 40, 45)
@@ -384,6 +412,7 @@ class UIMixin:
                  bg="lightcoral", width=12).pack(side=tk.LEFT, padx=5)
 
         time_entry.focus_set()
+        settings_window.deiconify()
 
     # on_window_configure
     def on_window_configure(self, event):
@@ -505,6 +534,7 @@ class UIMixin:
         self.ai_menu.add_separator()
         self.ai_menu.add_command(label="🎯 Custom prompt (kontekst)...", command=self.ollama_transform_custom)
         self.ai_menu.add_command(label="⚡ Zaznaczenie jako prompt...", command=self.ollama_selection_as_prompt)
+        self.ai_menu.add_command(label="❌ Anuluj generowanie (Ctrl+Shift+X)", command=self.ollama_cancel)
         self.ai_menu.add_separator()
         self.ai_menu.add_command(label="⚙️ Ustawienia Ollama", command=self.ollama_config_window)
 
@@ -569,8 +599,8 @@ Program jest w pełni darmowy!
 
 """
 
-        # Okno O programie
         about_window = tk.Toplevel(self.root)
+        about_window.withdraw()
         about_window.title("O programie - TekstDyrygent")
         about_window.geometry("800x600")
         about_window.transient(self.root)
@@ -626,6 +656,8 @@ Program jest w pełni darmowy!
         tk.Button(button_frame, text="Zamknij", command=on_close,
                  bg="lightcoral", font=("Arial", 10), width=15).pack(side=tk.LEFT, padx=5)
 
+        about_window.deiconify()
+
     # show_help
     def show_help(self):
         window_id = "help"
@@ -642,6 +674,7 @@ Ctrl+D/DEL - usuń linie na której jest kursor
 Ctrl+Alt+F - pogrub cały tekst
 Ctrl+Shift+O - wywołaj AI (Custom prompt z kontekstem)
 Ctrl+Shift+M - zaznaczenie jako prompt (odpowiedź wkleja poniżej zaznaczenia)
+Ctrl+Shift+X - anuluj generowanie AI
 Ctrl+Q - przejdź na początek
 Ctrl+W/S - skacz między słowami
 F5 - szybki zapis
@@ -713,8 +746,8 @@ FUNKCJE:
 - Paski komend i przycisków są zawsze widoczne
 """
 
-        # Okno instrukcji z większą czcionką
         help_window = tk.Toplevel(self.root)
+        help_window.withdraw()
         help_window.title("Instrukcja - TekstDyrygent")
         help_window.transient(self.root)
         self.center_window(help_window, 50, 60)
@@ -757,6 +790,8 @@ FUNKCJE:
         # Przycisk zamknij
         tk.Button(help_window, text="Zamknij", command=on_close,
                  bg="lightcoral", font=("Arial", 11), width=15).pack(pady=5)
+                 
+        help_window.deiconify()
 
     # toggle_notifications
     def toggle_notifications(self):
@@ -831,11 +866,12 @@ FUNKCJE:
         # Sprawdź przekroczenia i pokaż powiadomienia
         self.check_limits(usage_seconds // 60, int(line), text_bytes // 1024)
 
-        # Aktualizuj pasek statusu
-        model_info = f" | AI: {self.ollama_model}" if hasattr(self, 'ollama_model') else ""
-        self.status_bar.config(
-            text=f"Znaków: {total_chars} | Rozmiar: {size_str} | Linia: {line} | Kolumna: {int(column)+1} | Zaznaczenie: {selected_chars} | Czas: {time_str}{speed_str}{model_info}"
-        )
+        # Aktualizuj pasek statusu (nie nadpisuj gdy AI pracuje)
+        if not getattr(self, '_ollama_working', False):
+            model_info = f" | AI: {self.ollama_model}" if hasattr(self, 'ollama_model') else ""
+            self.status_bar.config(
+                text=f"Znaków: {total_chars} | Rozmiar: {size_str} | Linia: {line} | Kolumna: {int(column)+1} | Zaznaczenie: {selected_chars} | Czas: {time_str}{speed_str}{model_info}"
+            )
 
         # Aktualizacja duplikatów z opóźnieniem
         if self.show_duplicates:

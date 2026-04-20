@@ -96,6 +96,7 @@ class ToolsFeaturesMixin:
             return  # Okno już otwarte
 
         clear_window = tk.Toplevel(self.root)
+        clear_window.withdraw()
         clear_window.title("Czyść formatowanie")
         clear_window.transient(self.root)
         self.center_window(clear_window, 40, 30)
@@ -175,6 +176,7 @@ class ToolsFeaturesMixin:
                  bg="lightcoral", width=12).pack(side=tk.LEFT, padx=5)
 
         lines_entry.focus_set()
+        clear_window.deiconify()
 
     # delete_current_line
     def delete_current_line(self):
@@ -211,6 +213,7 @@ class ToolsFeaturesMixin:
             return  # Okno już otwarte
 
         empty_window = tk.Toplevel(self.root)
+        empty_window.withdraw()
         empty_window.title("Puste linie")
         empty_window.transient(self.root)
         self.center_window(empty_window, 40, 35)
@@ -316,6 +319,7 @@ class ToolsFeaturesMixin:
                  bg="lightcoral", width=12).pack(side=tk.LEFT, padx=5)
 
         text_entry.focus_set()
+        empty_window.deiconify()
 
     # end_typing_session
     def end_typing_session(self, end_time):
@@ -552,6 +556,7 @@ class ToolsFeaturesMixin:
             return  # Okno już otwarte
 
         toc_window = tk.Toplevel(self.root)
+        toc_window.withdraw()
         toc_window.title("Spis treści")
 
         # Dodaj do listy otwartych okien
@@ -586,6 +591,8 @@ class ToolsFeaturesMixin:
             toc_window.iconbitmap("icon.ico")
         except:
             pass
+
+        toc_window.deiconify()
 
         # Główny frame
         main_frame = tk.Frame(toc_window)
@@ -1078,6 +1085,7 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
 
         # Okno raportu - większe dla więcej danych
         report_window = tk.Toplevel(self.root)
+        report_window.withdraw()
         report_window.title("Raport Statystyczny - TekstDyrygent")
         report_window.transient(self.root)
         self.center_window(report_window, 70, 70)
@@ -1125,6 +1133,8 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
                  command=on_close,
                  bg="#F09999", width=15).pack(side=tk.LEFT, padx=5)
 
+        report_window.deiconify()
+
     # toggle_duplicates
     def toggle_duplicates(self):
         """Przełącza duplikaty z opcją minimalnej długości słów i filtrem pierwszej litery"""
@@ -1135,6 +1145,7 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
 
             # Okno dialogowe dla ustawień duplikatów
             duplicate_window = tk.Toplevel(self.root)
+            duplicate_window.withdraw()
             duplicate_window.title("Ustawienia duplikatów")
             duplicate_window.transient(self.root)
             duplicate_window.grab_set()
@@ -1199,6 +1210,8 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
             length_entry.bind('<Return>', lambda e: apply_duplicates())
             letter_entry.bind('<Return>', lambda e: apply_duplicates())
 
+            duplicate_window.deiconify()
+
         else:
             # Wyłącz duplikaty
             self.show_duplicates = False
@@ -1220,6 +1233,7 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
             return  # Okno już otwarte
 
         numbering_window = tk.Toplevel(self.root)
+        numbering_window.withdraw()
         numbering_window.title("Numeracja linii")
         numbering_window.transient(self.root)
         numbering_window.grab_set()
@@ -1400,6 +1414,8 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
         create_tooltip(separator_entry, "Znak po numerze (np. . : ) -)")
         create_tooltip(spacing_entry, "Ile spacji między numerem a tekstem")
 
+        numbering_window.deiconify()
+
     # toggle_reading_line
     def toggle_reading_line(self):
         """Przełącza linijkę do czytania"""
@@ -1413,6 +1429,7 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
 
             # Okno konfiguracji linijki
             config_window = tk.Toplevel(self.root)
+            config_window.withdraw()
             config_window.title("Konfiguracja linijki")
             config_window.transient(self.root)
             self.center_window(config_window, 40, 40)
@@ -1483,6 +1500,8 @@ Najdłuższa linia: {max(range(len(lines)), key=lambda i: len(lines[i])) + 1 if 
                      bg="lightgreen", width=12).pack(side=tk.LEFT, padx=5)
             tk.Button(button_frame, text="Anuluj", command=on_close,
                      bg="lightcoral", width=12).pack(side=tk.LEFT, padx=5)
+
+            config_window.deiconify()
         else:
             # Wyłącz linijkę
             self.reading_line_active = False

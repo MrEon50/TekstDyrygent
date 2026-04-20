@@ -1,6 +1,6 @@
 # 🎵 TekstDyrygent - Zaawansowany Notatnik AI
 
-**TekstDyrygent** to modularny edytor tekstu napisany w Pythonie (Tkinter), zaprojektowany z myślą o efektywnej pracy z tekstem, zaawansowanym formatowaniu oraz lokalnej integracji ze sztuczną inteligencją (Ollama).
+**TekstDyrygent** to potężny, modularny edytor tekstu napisany w Pythonie (Tkinter), zaprojektowany z myślą o efektywnej pracy z tekstem, zaawansowanym formatowaniu oraz lokalnej integracji ze sztuczną inteligencją (Ollama).
 
 ## 🚀 Główne Funkcje
 
@@ -18,10 +18,15 @@
 
 ### 🤖 Integracja AI (Ollama)
 Program łączy się lokalnie z serwerem **Ollama**, oferując:
+*   **Streaming (Real-time)**: Odpowiedzi AI pojawiają się w edytorze w czasie rzeczywistym (znak po znaku).
 *   **AI Transform**: Szybkie akcje (Podsumuj, Popraw błędy, Rozwiń, Parafrazuj, Tłumacz na dowolny język).
 *   **Zaznaczenie jako Prompt**: `Ctrl + Shift + M` wysyła zaznaczony tekst jako polecenie bezpośrednio do modelu.
 *   **Custom Prompt**: `Ctrl + Shift + O` pozwala na wpisanie własnego zapytania z uwzględnieniem kontekstu zaznaczenia.
-*   **Pasek statusu**: Wyświetla aktualnie wybrany model AI.
+*   **Anulowanie (Safety)**: `Ctrl + Shift + X` pozwala natychmiast przerwać generowanie tekstu przez AI.
+*   **System Prompt**: Możliwość zdefiniowania stałej instrukcji dla AI (np. "Odpowiadaj tylko po polsku" lub "Bądź kreatywnym asystentem"), która nadaje modelowi charakter.
+*   **Kontrola nad zaznaczeniem**: Opcja wyboru, czy odpowiedź AI ma zastąpić zaznaczony tekst, czy zostać dopisana pod spodem (z czytelnym separatorem).
+*   **Optymalizacja wydajności**: Możliwość ustawienia `num_ctx` (rozmiar kontekstu) oraz `keep_alive` (utrzymywanie modelu w pamięci RAM/VRAM) dla błyskawicznych odpowiedzi.
+*   **Pasek statusu**: Wyświetla czas generowania oraz aktualny stan (Ładowanie modelu / Generowanie / Gotowe).
 
 ### 🛠️ Narzędzia i Analiza
 *   **Spis Treści (TOC)**: Dynamiczna nawigacja po dokumencie (zapisywana automatycznie w plikach `.tdyf`).
@@ -40,6 +45,7 @@ Program łączy się lokalnie z serwerem **Ollama**, oferując:
 | **Ctrl + Alt + F** | Pogrubienie całego tekstu |
 | **Ctrl + Shift + O** | **AI Custom Prompt** (z kontekstem) |
 | **Ctrl + Shift + M** | **Zaznaczenie jako prompt** (wynik poniżej) |
+| **Ctrl + Shift + X** | **Anuluj generowanie AI** (natychmiastowe przerwanie) |
 | **Ctrl + D / Delete** | Usuń bieżącą linię |
 | **F5** | Szybki zapis |
 | **Ctrl + Z / Ctrl + Shift + Y** | Cofnij / Ponów (50 kroków) |
