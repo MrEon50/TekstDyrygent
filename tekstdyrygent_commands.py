@@ -364,7 +364,7 @@ class CommandsMixin:
                 self.update_status()
                 messagebox.showinfo("AI", f"Komenda AI wykonana (model: {model_name})")
 
-            self.call_ollama(prompt, text_to_process, handle_cmd_response, error_callback=restore_cmd_status)
+            self.call_ollama(prompt, text_to_process, lambda t: None, handle_cmd_response, on_error=restore_cmd_status)
         else:
             messagebox.showerror("Błąd", "Użyj: /ollama(model):prompt:zakres\nZakresy: 0, sel, 10-20")
 
