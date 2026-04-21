@@ -469,13 +469,11 @@ class ToolsFeaturesMixin:
 
     # on_click
     def on_click(self, event):
-        # Anuluj zaznaczenia przy normalnym kliknięciu (bez Ctrl+Shift)
-        if not (event.state & 0x4 and event.state & 0x1):  # Nie Ctrl+Shift
-            if self.column_selection_active:
-                self.column_selection_active = False
-                self.clear_column_selection()
-            self.clear_multi_selection()
-            self.clear_right_click_selection()
+        # Anuluj zaznaczenia przy normalnym kliknięciu (bez Ctrl/Alt/Shift)
+        # 0x4 = Ctrl, 0x1 = Shift, 0x20000 = Alt (zależnie od systemu)
+        # Sprawdzamy czy jakiekolwiek modyfikatory są wciśnięte
+        if not (event.state & (0x4 | 0x1 | 0x20000 | 0x8 | 0x40)): # 0x8/0x40 to często Alt/Cmd
+            self.clear_all_custom_selections()
         self.update_status()
 
     # on_double_click

@@ -32,6 +32,17 @@ class SelectionMixin:
             self.text_area.tag_delete(tag)
         self.right_click_selection_tags = []
 
+    # clear_all_custom_selections
+    def clear_all_custom_selections(self, event=None):
+        """Usuwa absolutnie wszystkie niestandardowe zaznaczenia i podświetlenia"""
+        self.clear_column_selection()
+        self.clear_multi_selection()
+        self.clear_right_click_selection()
+        self.text_area.tag_remove("duplicate_highlight", "1.0", tk.END)
+        self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
+        self.column_selection_active = False
+        return "break" if event else None
+
     # column_select_down
     def column_select_down(self, event):
         """Rozszerza zaznaczenie kolumnowe w dół (Alt + Strzałka w dół)"""
@@ -274,17 +285,26 @@ class SelectionMixin:
 
     # ctrl_right_click_select_column
     def ctrl_right_click_select_column(self, event):
-        """Zaznacza całą kolumnę Ctrl+prawym kliknięciem (można zaznaczać wiele kolumn)"""
+        """Zaznacza kolumnę w ograniczonym zakresie (widoczne linie + 100), aby uniknąć zawieszenia przy ogromnych plikach"""
         # Pobierz pozycję kliknięcia
         click_pos = self.text_area.index(f"@{event.x},{event.y}")
-        column = int(click_pos.split('.')[1])
+        click_line, column = map(int, click_pos.split('.'))
 
-        # Pobierz wszystkie linie tekstu
-        text = self.text_area.get('1.0', tk.END)
-        lines = text.split('\n')
+        # Pobierz zakres widocznych linii
+        try:
+            first_visible = int(self.text_area.index("@0,0").split('.')[0])
+            last_visible = int(self.text_area.index(f"@0,{self.text_area.winfo_height()}").split('.')[0])
+            
+            # Ograniczamy do widocznych + mały bufor (np. 100 linii w górę i w dół od kliknięcia)
+            start_line = max(1, click_line - 100)
+            end_line = click_line + 100
+        except:
+            # Fallback jeśli nie można pobrać widocznych
+            start_line = max(1, click_line - 50)
+            end_line = click_line + 50
 
-        # Zaznacz kolumnę we wszystkich liniach
-        for line_num in range(1, len(lines)):
+        # Zaznacz kolumnę w ograniczonym zakresie
+        for line_num in range(start_line, end_line + 1):
             line_start = f"{line_num}.0"
             line_end = f"{line_num}.end"
 
@@ -299,9 +319,12 @@ class SelectionMixin:
                     self.text_area.tag_add(tag_name, start_pos, end_pos)
                     self.text_area.tag_config(tag_name, background='lightcoral', foreground='white')
                     self.right_click_selection_tags.append(tag_name)
-
             except tk.TclError:
                 continue
+
+        # Informacja dla użytkownika (opcjonalnie)
+        if hasattr(self, 'status_bar'):
+            self.status_bar.config(text=f"Zaznaczono kolumnę {column+1} w zakresie linii {start_line}-{end_line}")
 
         return "break"
 
@@ -559,13 +582,14 @@ class SelectionMixin:
 
     # multi_select_click
     def multi_select_click(self, event):
-        """Wielokrotne zaznaczanie fragmentów (Ctrl+Shift+klik)"""
+        """Wielokrotne zaznaczanie fragmentów (Ctrl+klik) oraz wyszukiwanie duplikatów"""
         # Pobierz pozycję kliknięcia
         click_pos = self.text_area.index(f"@{event.x},{event.y}")
 
         # Znajdź granice słowa
-        line_start = click_pos.split('.')[0] + '.0'
-        line_end = click_pos.split('.')[0] + '.end'
+        line_num = click_pos.split('.')[0]
+        line_start = line_num + '.0'
+        line_end = line_num + '.end'
         line_text = self.text_area.get(line_start, line_end)
 
         # Znajdź pozycję w linii
@@ -584,7 +608,7 @@ class SelectionMixin:
 
             # Utwórz zaznaczenie słowa
             if start_col < end_col:
-                line_num = click_pos.split('.')[0]
+                word = line_text[start_col:end_col]
                 tag_name = f"multi_sel_{len(self.multi_selection_tags)}_{line_num}_{start_col}"
                 start_pos = f"{line_num}.{start_col}"
                 end_pos = f"{line_num}.{end_col}"
@@ -593,7 +617,43 @@ class SelectionMixin:
                 self.text_area.tag_config(tag_name, background='yellow', foreground='black')
                 self.multi_selection_tags.append(tag_name)
 
+                # Punkt 4: Wyszukaj duplikaty tego słowa
+                if word.strip() and len(word) >= 2:
+                    full_text = self.text_area.get('1.0', tk.END)
+                    # Uproszczone liczenie wystąpień (case-insensitive)
+                    matches = re.findall(r'\b' + re.escape(word) + r'\b', full_text, re.IGNORECASE)
+                    count = len(matches)
+                    
+                    # Podświetl pozostałe duplikaty innym tagiem (jeśli chcesz)
+                    # Ale użytkownik prosił o komunikat
+                    if hasattr(self, 'status_bar'):
+                        self.status_bar.config(text=f"Słowo '{word}' występuje {count} razy w tekście.")
+                    
+                    # Opcjonalnie: podświetl wszystkie wystąpienia jak w find_duplicates_of_word
+                    self.highlight_word_instances(word)
+
         return "break"
+
+    def highlight_word_instances(self, word):
+        """Podświetla wszystkie wystąpienia słowa (duplikaty)"""
+        start_pos = "1.0"
+        while True:
+            start_pos = self.text_area.search(word, start_pos, tk.END, nocase=True)
+            if not start_pos:
+                break
+            
+            # Sprawdź granice słowa
+            char_before = self.text_area.get(f"{start_pos}-1c", start_pos)
+            char_after = self.text_area.get(f"{start_pos}+{len(word)}c", f"{start_pos}+{len(word)+1}c")
+
+            if (not char_before.isalnum() and char_before != '_') and \
+               (not char_after.isalnum() and char_after != '_'):
+                end_pos = f"{start_pos}+{len(word)}c"
+                self.text_area.tag_add("duplicate_highlight", start_pos, end_pos)
+            
+            start_pos = f"{start_pos}+1c"
+        
+        self.text_area.tag_config("duplicate_highlight", background='lightcoral', foreground='white')
 
     # right_click_select_word
     def right_click_select_word(self, event):

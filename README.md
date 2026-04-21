@@ -1,6 +1,6 @@
 # 🎵 TekstDyrygent - Zaawansowany Notatnik AI
 
-**TekstDyrygent** to modularny edytor tekstu napisany w Pythonie (Tkinter), zaprojektowany z myślą o efektywnej pracy z tekstem, zaawansowanym formatowaniu oraz lokalnej integracji ze sztuczną inteligencją (Ollama).
+**TekstDyrygent** to potężny, modularny edytor tekstu napisany w Pythonie (Tkinter), zaprojektowany z myślą o efektywnej pracy z tekstem, zaawansowanym formatowaniu oraz lokalnej integracji ze sztuczną inteligencją (Ollama).
 
 ## 🚀 Główne Funkcje
 
@@ -13,12 +13,16 @@
 ### 🖱️ Zaawansowane Zaznaczanie
 *   **Zaznaczanie kolumnowe (prostokątne)**: `Alt + mysz` lub komendy `/col`.
 *   **Edycja kolumnowa**: Usuwanie, kopiowanie i wklejanie tekstu w pionowych blokach.
-*   **Wielokrotne zaznaczanie**: `Ctrl + Shift + Klik` do zaznaczania wielu słów naraz.
-*   **Zaznaczanie duplikatów**: `Ctrl + Double Click` zaznacza wszystkie wystąpienia danego słowa.
+*   **Wielokrotne zaznaczenie**: `Ctrl + Klik` do zaznaczania wielu słów lub fragmentów naraz (podświetlenie żółte).
+*   **Wyszukiwanie duplikatów**: `Ctrl + Klik` na słowo wyświetla liczbę jego wystąpień i podświetla je (podświetlenie czerwone).
+*   **Szybkie czyszczenie**: `Esc` lub zwykły klik lewym przyciskiem myszy natychmiast usuwa wszystkie podświetlenia i zaznaczenia.
+*   **Zoptymalizowana kolumna**: `Ctrl + Prawy klik` zaznacza kolumnę w bezpiecznym zakresie (zoptymalizowane dla ogromnych plików tekstowych).
 
 ### 🤖 Integracja AI (Ollama)
 Program łączy się lokalnie z serwerem **Ollama**, oferując:
-*   **Streaming (Real-time)**: Odpowiedzi AI pojawiają się w edytorze w czasie rzeczywistym (znak po znaku).
+*   **Streaming (Real-time)**: Odpowiedzi AI pojawiają się w edytorze w czasie rzeczywistym.
+*   **Wsparcie dla Multi-selection**: AI potrafi zebrać tekst ze wszystkich rozproszonych zaznaczeń (Ctrl+Klik) i przetworzyć je jako jedną całość, wklejając wynik pod ostatnim z nich.
+*   **Powtórz prompt**: Przycisk `🔄 Powtórz` (lub `Ctrl + Alt + P`) pozwala błyskawicznie uruchomić ostatnio wpisany własny prompt bez otwierania okna dialogowego.
 *   **AI Transform**: Szybkie akcje (Podsumuj, Popraw błędy, Rozwiń, Parafrazuj, Tłumacz na dowolny język).
 *   **Zaznaczenie jako Prompt**: `Ctrl + Shift + M` wysyła zaznaczony tekst jako polecenie bezpośrednio do modelu.
 *   **Custom Prompt**: `Ctrl + Shift + O` pozwala na wpisanie własnego zapytania z uwzględnieniem kontekstu zaznaczenia.
@@ -42,13 +46,16 @@ Program łączy się lokalnie z serwerem **Ollama**, oferując:
 | **Ctrl + F** | Pogrubienie zaznaczenia |
 | **Ctrl + Y / R / B / G / P** | Kolorowanie (Żółty, Czerwony, Niebieski, Zielony, Fioletowy) |
 | **Ctrl + 0** | Usuń formatowanie |
+| **Esc** | **Anuluj wszystkie zaznaczenia** (kolumnowe, multi, duplikaty) |
+| **Ctrl + Klik** | **Wielokrotne zaznaczanie / Szukanie duplikatów** |
+| **Ctrl + Alt + P** | **Powtórz ostatni prompt AI** |
 | **Ctrl + Alt + F** | Pogrubienie całego tekstu |
 | **Ctrl + Shift + O** | **AI Custom Prompt** (z kontekstem) |
 | **Ctrl + Shift + M** | **Zaznaczenie jako prompt** (wynik poniżej) |
-| **Ctrl + Shift + X** | **Anuluj generowanie AI** (natychmiastowe przerwanie) |
+| **Ctrl + Shift + X** | **Anuluj generowanie AI** |
 | **Ctrl + D / Delete** | Usuń bieżącą linię |
 | **F5** | Szybki zapis |
-| **Ctrl + Z / Ctrl + Shift + Y** | Cofnij / Ponów (50 kroków) |
+| **Ctrl + Z / Ctrl + Shift + Y** | Cofnij / Ponów |
 | **Ctrl + Q** | Przeskok na początek dokumentu |
 | **Alt + Mysz** | Zaznaczanie kolumnowe |
 

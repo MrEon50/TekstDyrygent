@@ -22,6 +22,7 @@ class UIMixin:
         self.root.bind('<Control-g>', lambda e: self.format_selection('green'))
         self.root.bind('<Control-p>', lambda e: self.format_selection('purple'))
         self.root.bind('<Control-0>', lambda e: self.format_selection('clear'))
+        self.root.bind('<Escape>', self.clear_all_custom_selections)
 
         self.root.bind('<Control-Alt-f>', lambda e: self.bold_all_text())
         self.root.bind('<Control-q>', lambda e: self.jump_to_start())
@@ -48,6 +49,9 @@ class UIMixin:
         self.root.bind('<Control-Shift-X>', cancel_ai_action)
         self.root.bind('<Control-Shift-x>', cancel_ai_action)
 
+        # Skrót do powtarzania promptu
+        self.root.bind('<Control-Alt-p>', lambda e: self.ollama_repeat_last_prompt())
+
         # Nowe skróty
         self.root.bind('<F5>', lambda e: self.quick_save())
         
@@ -71,8 +75,9 @@ class UIMixin:
         self.text_area.bind('<Control-d>', safe_delete_line)
         self.text_area.bind('<Control-Delete>', safe_delete_line)
         
-        # Wielokrotne zaznaczanie
-        self.text_area.bind('<Control-Shift-Button-1>', self.multi_select_click)
+        # Wielokrotne zaznaczanie i duplikaty pod Ctrl+Klik
+        self.text_area.bind('<Control-Button-1>', self.multi_select_click)
+        self.text_area.bind('<Control-Double-Button-1>', self.find_duplicates_of_word)
 
         # Prawy przycisk myszy - zaznaczanie
         self.text_area.bind('<Button-3>', self.right_click_select_word)
@@ -545,6 +550,9 @@ class UIMixin:
                                  bg="#D1FFD1", fg="#2E1A47", font=("Arial", 10, "bold"))
         self.ai_button.pack(side=tk.LEFT, padx=2)
 
+        tk.Button(button_frame, text="🔄 Powtórz", command=self.ollama_repeat_last_prompt,
+                  bg="#D1FFD1", fg="#2E1A47", font=("Arial", 9)).pack(side=tk.LEFT, padx=2)
+
 
         # Pasek komend - zawsze widoczny
         self.command_frame = tk.Frame(main_container, relief=tk.RAISED, bd=1)
@@ -680,20 +688,28 @@ Ctrl+W/S - skacz między słowami
 F5 - szybki zapis
 Ctrl+Z - cofnij (do 50 kroków)
 Ctrl+Shift+Y - ponów
+Ctrl+Alt+P - powtórz ostatni custom prompt
+Esc - anuluj wszystkie zaznaczenia (kolumnowe, multi, duplikaty)
 
 ZAZNACZANIE:
 Alt+przeciągnij myszą - zaznacz prostokątny blok tekstu
-Ctrl+Shift+klik - wielokrotne zaznaczanie słów
-Ctrl+podwójne kliknięcie - zaznacz wszystkie duplikaty słowa
+Ctrl+klik - zaznaczanie wielu słów LUB duplikatów (wyświetla komunikat o ilości)
+Ctrl+Double click - wyszukaj wszystkie wystąpienia słowa (duplikaty)
 Prawy klik - zaznacz słowo (można zaznaczać wiele słów)
-Ctrl+prawy klik - zaznacz kolumnę (można zaznaczać wiele kolumn)
-Kliknij normalnie - anuluj wszystkie zaznaczenia
+Ctrl+prawy klik - zaznacz kolumnę (zoptymalizowane dla dużych plików)
+Kliknij normalnie - anuluj wszystkie zaznaczenia i podświetlenia
 
 EDYCJA ZAZNACZENIA KOLUMNOWEGO:
 Delete/Backspace - usuń zaznaczone znaki
 Ctrl+C - skopiuj zaznaczone znaki
 Ctrl+X - wytnij zaznaczone znaki
 Ctrl+V - wklej do zaznaczonych pozycji
+
+AI (OLLAMA):
+• Przycisk "🤖 AI" - menu szybkich akcji
+• Przycisk "🔄 Powtórz" - wykonuje ostatni własny prompt natychmiast
+• Wielokrotne zaznaczenie (Ctrl+Klik): AI zbiera tekst ze wszystkich zaznaczonych miejsc i odpowiada pod ostatnim z nich (wygodne przy uzupełnianiu wielu fragmentów).
+• Ctrl+Shift+X - natychmiastowe przerwanie pracy AI
 
 SPIS TREŚCI:
 Przycisk "Spis treści" - otwiera okno nawigacji
@@ -729,6 +745,7 @@ PRZYCISKI:
 • Puste linie - wypełnia puste linie tekstem
 • Linijka - pomoc w czytaniu z nawigacją strzałkami
 • 🤖 AI - menu szybkich akcji sztucznej inteligencji (Ollama)
+• 🔄 Powtórz - powtarza ostatni prompt AI
 
 SKRÓTY KLAWISZOWE:
 • Ctrl+0 - czyści wszystkie formatowania
@@ -750,7 +767,7 @@ FUNKCJE:
         help_window.withdraw()
         help_window.title("Instrukcja - TekstDyrygent")
         help_window.transient(self.root)
-        self.center_window(help_window, 50, 60)
+        self.center_window(help_window, 50, 75)
 
         # Dodaj do listy otwartych okien
         self.open_windows.add(window_id)

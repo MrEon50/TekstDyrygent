@@ -24,6 +24,7 @@ class OllamaMixin:
         # Wewnętrzny znacznik pozycji wstawiania (line.col jako string)
         self._ai_insert_pos = None
         self._first_token_received = False
+        self._last_custom_prompt = ""  # Zapamiętany ostatni prompt
 
         self.load_ollama_settings()
 
@@ -250,12 +251,29 @@ class OllamaMixin:
 
         try:
             selection = self.text_area.tag_ranges(tk.SEL)
-
+            
+            # Dodatkowa obsługa wielokrotnego zaznaczania (multi_selection_tags)
+            multi_text = []
+            if not selection and hasattr(self, 'multi_selection_tags') and self.multi_selection_tags:
+                for tag in self.multi_selection_tags:
+                    ranges = self.text_area.tag_ranges(tag)
+                    if ranges:
+                        multi_text.append(self.text_area.get(ranges[0], ranges[1]))
+            
             if selection:
                 text_to_process = self.text_area.get(selection[0], selection[1])
                 sel_start = self.text_area.index(selection[0])
                 sel_end   = self.text_area.index(selection[1])
                 has_selection = True
+            elif multi_text:
+                text_to_process = "\n".join(multi_text)
+                sel_start = "1.0" # Dla wielu zaznaczeń domyślnie dopisujemy na końcu lub w ostatnim punkcie
+                sel_end = self.text_area.index(tk.END)
+                has_selection = False
+                # Możemy spróbować ustawić pozycję wstawiania na ostatnie zaznaczenie
+                last_tag_ranges = self.text_area.tag_ranges(self.multi_selection_tags[-1])
+                if last_tag_ranges:
+                    sel_end = self.text_area.index(last_tag_ranges[1])
             else:
                 text_to_process = self.text_area.get("1.0", tk.END).strip()
                 sel_start = "1.0"
@@ -435,7 +453,15 @@ class OllamaMixin:
             self.text_area.tag_add(tk.SEL, sel[0], sel[1])
 
         if prompt:
+            self._last_custom_prompt = prompt
             self.ollama_transform("custom", custom_prompt=prompt)
+
+    def ollama_repeat_last_prompt(self):
+        """Powtarza ostatnio użyty własny prompt bez otwierania okna"""
+        if not self._last_custom_prompt:
+            messagebox.showinfo("AI", "Brak zapisanego ostatniego promptu. Użyj najpierw 'Custom prompt'.")
+            return
+        self.ollama_transform("custom", custom_prompt=self._last_custom_prompt)
 
     def ollama_translate(self):
         """Tłumaczenie na wybrany język"""
@@ -510,7 +536,17 @@ class OllamaMixin:
         win.withdraw()  # Ukryj na czas budowania
         win.title("Ustawienia Ollama")
         win.transient(self.root)
-        self.center_window(win, 35, 60)
+        win.geometry("600x700")
+        
+        # Wyśrodkowanie okna o zadanym rozmiarze
+        self.root.update_idletasks()
+        main_x = self.root.winfo_x()
+        main_y = self.root.winfo_y()
+        main_w = self.root.winfo_width()
+        main_h = self.root.winfo_height()
+        pos_x = main_x + (main_w - 600) // 2
+        pos_y = main_y + (main_h - 700) // 2
+        win.geometry(f"600x700+{pos_x}+{pos_y}")
 
         try:
             win.iconbitmap("icon.ico")
